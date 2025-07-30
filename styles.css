@@ -1,0 +1,296 @@
+:root {
+    --neon-color: #0ff; /* Default turquoise */
+}
+
+body {
+    background-color: #000;
+    color: #fff;
+    font-family: 'Arial', sans-serif;
+    margin: 0;
+    padding: 20px;
+    overflow-x: hidden;
+    position: relative;
+    min-height: 100vh;
+}
+
+/* Stars Background */
+.stars-container {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: -1;
+    overflow: hidden;
+}
+
+.star {
+    position: absolute;
+    background-color: #fff;
+    border-radius: 50%;
+    animation: twinkle 3s infinite ease-in-out;
+    will-change: opacity, transform;
+}
+
+@keyframes twinkle {
+    0%, 100% { opacity: 0.3; transform: scale(0.8); }
+    50% { opacity: 1; transform: scale(1.1); }
+}
+
+/* Theme Selector */
+.theme-selector {
+    position: fixed;
+    top: 10px;
+    right: 10px;
+    display: flex;
+    gap: 8px;
+    z-index: 100;
+}
+
+.theme-color {
+    width: 25px;
+    height: 25px;
+    border-radius: 50%;
+    cursor: pointer;
+    border: 2px solid white;
+    transition: all 0.2s;
+}
+
+.theme-color:hover {
+    transform: scale(1.2);
+}
+
+.theme-color[data-color="lime"] { background: #0fa; }
+.theme-color[data-color="turquoise"] { background: #0ff; }
+.theme-color[data-color="fuchsia"] { background: #f0f; }
+.theme-color[data-color="yellow"] { background: #ff0; }
+.theme-color[data-color="silver"] { background: #ccc; }
+
+/* Container & Title */
+.container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.neon-text {
+    text-align: center;
+    width: 100%;
+    margin: 20px auto;
+    color: #fff;
+    text-shadow: 
+        0 0 5px var(--neon-color),
+        0 0 10px var(--neon-color),
+        0 0 20px var(--neon-color),
+        0 0 40px var(--neon-color);
+    font-size: 2rem;
+}
+
+/* Card Styling */
+.card {
+    position: relative;
+    padding: 30px;
+    max-width: 400px;
+    margin: 0 auto 30px;
+    background: rgba(0, 0, 0, 0.7);
+    border-radius: 10px;
+    overflow: hidden;
+    transition: all 0.3s ease;
+}
+
+.card::before {
+    content: '';
+    position: absolute;
+    top: -2px;
+    left: -2px;
+    right: -2px;
+    bottom: -2px;
+    background: linear-gradient(45deg, var(--neon-color), #000, var(--neon-color));
+    z-index: -1;
+    border-radius: 12px;
+    opacity: 0.7;
+}
+
+.card::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: linear-gradient(135deg, 
+        rgba(0, 255, 255, 0.1), 
+        rgba(0, 0, 0, 0.8), 
+        rgba(0, 255, 255, 0.1));
+    z-index: -1;
+    border-radius: 10px;
+}
+
+.card h2 {
+    text-align: center;
+    margin-bottom: 25px;
+    position: relative;
+}
+
+.card h2::after {
+    content: '';
+    display: block;
+    width: 50px;
+    height: 3px;
+    background: var(--neon-color);
+    margin: 10px auto 0;
+    box-shadow: 0 0 10px var(--neon-color);
+}
+
+/* Form Elements */
+.form-group {
+    position: relative;
+    margin-bottom: 30px;
+}
+
+input {
+    width: 100%;
+    padding: 15px 10px 5px 10px;
+    background: rgba(0, 0, 0, 0.5);
+    border: 1px solid var(--neon-color);
+    color: #fff;
+    border-radius: 4px;
+    font-size: 1rem;
+    transition: all 0.3s;
+}
+
+input:focus {
+    outline: none;
+    box-shadow: 0 0 10px var(--neon-color);
+    background: rgba(0, 0, 0, 0.7);
+}
+
+label {
+    position: absolute;
+    top: 5px;
+    left: 10px;
+    font-size: 0.8rem;
+    color: var(--neon-color);
+    pointer-events: none;
+    transition: all 0.3s;
+    opacity: 0.8;
+    text-shadow: 0 0 5px var(--neon-color);
+}
+
+input:focus + label,
+input:not(:placeholder-shown) + label {
+    top: -15px;
+    left: 5px;
+    font-size: 0.7rem;
+    opacity: 1;
+}
+
+input::placeholder {
+    color: transparent;
+}
+
+/* Buttons */
+.button-container {
+    display: flex;
+    justify-content: center;
+    margin: 20px 0;
+}
+
+.neon-button {
+    background: linear-gradient(135deg, 
+        var(--neon-color), 
+        rgba(0, 0, 0, 0.7));
+    color: #000;
+    border: none;
+    padding: 12px 30px;
+    font-size: 1rem;
+    border-radius: 25px;
+    cursor: pointer;
+    transition: all 0.3s;
+    position: relative;
+    overflow: hidden;
+    z-index: 1;
+    min-width: 200px;
+    text-align: center;
+}
+
+.neon-button::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg,
+        transparent,
+        rgba(255, 255, 255, 0.4),
+        transparent);
+    transition: 0.5s;
+    z-index: -1;
+}
+
+.neon-button:hover::before {
+    left: 100%;
+}
+
+.neon-button:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 5px 15px var(--neon-color);
+}
+
+/* Hidden Sections */
+#horoscope-result,
+#birthdays-list {
+    display: none;
+    text-align: center;
+    margin-top: 20px;
+}
+
+#birthdays-ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+#birthdays-ul li {
+    padding: 12px;
+    margin: 8px 0;
+    background-color: rgba(0, 255, 255, 0.1);
+    border-left: 3px solid var(--neon-color);
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 768px) {
+    .container {
+        padding: 15px;
+    }
+    
+    .neon-text {
+        font-size: 1.5rem;
+    }
+    
+    .card {
+        width: 90%;
+        padding: 20px;
+    }
+    
+    input {
+        font-size: 16px;
+    }
+    
+    .neon-button {
+        padding: 10px 20px;
+        min-width: 160px;
+    }
+}
+
+@media (max-width: 480px) {
+    input[type="date"] {
+        min-height: 40px;
+    }
+    
+    #birthdays-ul li {
+        padding: 10px 5px;
+        font-size: 0.9rem;
+    }
+}

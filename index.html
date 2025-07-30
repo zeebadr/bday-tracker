@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Friends' Birthday Tracker</title>
+    <link rel="stylesheet" href="styles.css">
+    <!-- Supabase Client -->
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <!-- Your JS -->
+    <script src="app.js" defer></script>
+</head>
+<body>
+    <div class="stars-container"></div>
+    
+    <div class="theme-selector">
+        <div class="theme-color" data-color="turquoise"></div>
+        <div class="theme-color" data-color="lime"></div>
+        <div class="theme-color" data-color="fuchsia"></div>
+        <div class="theme-color" data-color="yellow"></div>
+        <div class="theme-color" data-color="silver"></div>
+    </div>
+    
+    <div class="container">
+        <h1 class="neon-text">🎉 Birthday Tracker 🎉</h1>
+        
+        <div class="card neon-border">
+            <h2>Add Your Birthday</h2>
+            
+            <form id="birthday-form">
+                <div class="form-group">
+                    <input type="text" id="name" required placeholder=" ">
+                    <label for="name">Your Name</label>
+                </div>
+                
+                <div class="form-group">
+                    <input type="date" id="birthdate" required placeholder=" ">
+                    <label for="birthdate">Birth Date</label>
+                </div>
+                
+                <div class="button-container">
+                    <button type="submit" class="neon-button submit-btn">Submit</button>
+                </div>
+            </form>
+            
+            <div id="horoscope-result">
+                <h3>Your Horoscope:</h3>
+                <p id="horoscope-text"></p>
+            </div>
+        </div>
+        
+        <div class="button-container">
+            <button id="show-birthdays" class="neon-button">View All Birthdays</button>
+        </div>
+        
+        <div id="birthdays-list">
+            <h2>🎂 Upcoming Birthdays</h2>
+            <ul id="birthdays-ul"></ul>
+        </div>
+    </div>
+</body>
+</html>
