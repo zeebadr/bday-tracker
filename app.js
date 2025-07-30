@@ -3,7 +3,49 @@ const supabaseUrl = "https://tgpliyjqqndrrtsyhkno.supabase.co";
 const supabaseKey = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InRncGxpeWpxcW5kcnJ0c3loa25vIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTM4NzEzMjAsImV4cCI6MjA2OTQ0NzMyMH0.jvUqfCVbz8tH53VOahkrBMPjvzmv0ygSWxGiWpw4S2Q";
 const supabase = supabase.createClient(supabaseUrl, supabaseKey);
 
-// ==================== THEME MANAGEMENT ====================
+// Initialize app when DOM loads
+document.addEventListener('DOMContentLoaded', async () => {
+    // Initialize components
+    initTheme();
+    createStars();
+    setupRealtime();
+    
+    // Load existing birthdays
+    await displayBirthdays();
+    
+    // Setup form submission
+    document.getElementById('birthday-form').addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const name = document.getElementById('name').value.trim();
+        const birthdate = document.getElementById('birthdate').value;
+        
+        if (!name || !birthdate) {
+            alert("Please fill in all fields");
+            return;
+        }
+        
+        try {
+            const { error } = await supabase
+                .from('birthdays')
+                .insert([{ name, birthdate }]);
+            
+            if (error) throw error;
+            
+            showHoroscope(birthdate);
+            document.getElementById('birthday-form').reset();
+        } catch (error) {
+            console.error("Error:", error);
+            alert("Failed to save. Please try again.");
+        }
+    });
+    
+    // Setup view birthdays button
+    document.getElementById('show-birthdays').addEventListener('click', () => {
+        document.getElementById('birthdays-list').style.display = 'block';
+    });
+});
+
+// THEME MANAGEMENT
 function initTheme() {
     const savedColor = localStorage.getItem('neonColor') || 'turquoise';
     setThemeColor(savedColor);
@@ -14,11 +56,6 @@ function initTheme() {
             setThemeColor(color);
             localStorage.setItem('neonColor', color);
         });
-        
-        if (btn.getAttribute('data-color') === savedColor) {
-            btn.style.transform = 'scale(1.2)';
-            btn.style.boxShadow = '0 0 10px white';
-        }
     });
 }
 
@@ -31,37 +68,39 @@ function setThemeColor(color) {
         silver: '#ccc'
     };
     document.documentElement.style.setProperty('--neon-color', colors[color]);
+    
+    // Update active button style
+    document.querySelectorAll('.theme-color').forEach(btn => {
+        const btnColor = btn.getAttribute('data-color');
+        btn.style.transform = btnColor === color ? 'scale(1.2)' : 'scale(1)';
+        btn.style.boxShadow = btnColor === color ? '0 0 10px white' : 'none';
+    });
 }
 
-// ==================== STARS BACKGROUND ====================
+// STARS BACKGROUND
 function createStars() {
-    const starsContainer = document.querySelector('.stars-container');
-    const isMobile = window.innerWidth < 768;
-    const starCount = isMobile ? 60 : 100;
+    const container = document.querySelector('.stars-container');
+    container.innerHTML = '';
     
-    starsContainer.innerHTML = '';
-    
-    for (let i = 0; i < starCount; i++) {
+    for (let i = 0; i < 100; i++) {
         const star = document.createElement('div');
-        star.classList.add('star');
-        
-        const size = isMobile ? (Math.random() * 1.5 + 0.5) : (Math.random() * 2 + 1);
-        star.style.width = `${size}px`;
-        star.style.height = `${size}px`;
-        star.style.left = `${Math.random() * 100}%`;
-        star.style.top = `${Math.random() * 100}%`;
-        star.style.animationDelay = `${Math.random() * 5}s`;
-        star.style.animationDuration = `${Math.random() * 3 + 2}s`;
-        
-        starsContainer.appendChild(star);
+        star.className = 'star';
+        star.style.cssText = `
+            width: ${Math.random() * 3}px;
+            height: ${Math.random() * 3}px;
+            left: ${Math.random() * 100}%;
+            top: ${Math.random() * 100}%;
+            animation-delay: ${Math.random() * 5}s;
+        `;
+        container.appendChild(star);
     }
 }
 
-// ==================== HOROSCOPE LOGIC ====================
-function getHoroscope(birthdate) {
-    const date = new Date(birthdate);
-    const month = date.getMonth() + 1;
-    const day = date.getDate();
+// HOROSCOPE LOGIC
+function getHoroscope(date) {
+    const d = new Date(date);
+    const month = d.getMonth() + 1;
+    const day = d.getDate();
     
     if ((month === 1 && day >= 20) || (month === 2 && day <= 18)) return { sign: "Aquarius", emoji: "♒" };
     if ((month === 2 && day >= 19) || (month === 3 && day <= 20)) return { sign: "Pisces", emoji: "♓" };
@@ -77,122 +116,38 @@ function getHoroscope(birthdate) {
     return { sign: "Capricorn", emoji: "♑" };
 }
 
-// ==================== BIRTHDAY OPERATIONS ====================
-async function addBirthday(name, birthdate) {
-    const { error } = await supabase
-        .from('birthdays')
-        .insert([{ name, birthdate }]);
-    
-    if (error) {
-        console.error("Error saving birthday:", error);
-        alert("Failed to save birthday. Please try again.");
-        return false;
-    }
-    return true;
-}
-
-async function getBirthdays() {
-    const { data, error } = await supabase
-        .from('birthdays')
-        .select('*')
-        .order('birthdate', { ascending: true });
-    
-    if (error) {
-        console.error("Error loading birthdays:", error);
-        return [];
-    }
-    
-    // Adjust for upcoming birthdays
-    const now = new Date();
-    return data.map(bday => {
-        const date = new Date(bday.birthdate);
-        date.setFullYear(now.getFullYear());
-        if (date < now) date.setFullYear(now.getFullYear() + 1);
-        return { ...bday, sortDate: date };
-    }).sort((a, b) => a.sortDate - b.sortDate);
-}
-
-// ==================== UI FUNCTIONS ====================
-async function displayBirthdays() {
-    const birthdays = await getBirthdays();
-    const listElement = document.getElementById('birthdays-ul');
-    
-    listElement.innerHTML = birthdays.length > 0 
-        ? birthdays.map(bday => `
-            <li>
-                <span class="name">${bday.name}</span>
-                <span class="date">${formatDate(bday.birthdate)}</span>
-            </li>
-          `).join('')
-        : '<li class="empty">No birthdays saved yet</li>';
-    
-    document.getElementById('birthdays-list').style.display = 'block';
-}
-
-function formatDate(dateString) {
-    return new Date(dateString).toLocaleDateString('en-US', { 
-        month: 'long', 
-        day: 'numeric' 
-    });
-}
-
-function showHoroscope(birthdate) {
-    const { sign, emoji } = getHoroscope(birthdate);
-    document.getElementById('horoscope-text').textContent = 
-        `${emoji} You're a ${sign}! ${emoji}`;
+function showHoroscope(date) {
+    const { sign, emoji } = getHoroscope(date);
+    document.getElementById('horoscope-text').textContent = `${emoji} ${sign} ${emoji}`;
     document.getElementById('horoscope-result').style.display = 'block';
 }
 
-// ==================== REALTIME UPDATES ====================
+// BIRTHDAY OPERATIONS
+async function displayBirthdays() {
+    try {
+        const { data, error } = await supabase
+            .from('birthdays')
+            .select('*')
+            .order('birthdate', { ascending: true });
+        
+        if (error) throw error;
+        
+        const list = document.getElementById('birthdays-ul');
+        list.innerHTML = data.length 
+            ? data.map(b => `<li>${b.name} - ${new Date(b.birthdate).toLocaleDateString()}</li>`).join('')
+            : '<li>No birthdays yet</li>';
+    } catch (error) {
+        console.error("Failed to load birthdays:", error);
+    }
+}
+
 function setupRealtime() {
     supabase
         .channel('birthday-changes')
         .on('postgres_changes', {
-            event: 'INSERT',
+            event: '*',
             schema: 'public',
             table: 'birthdays'
-        }, (payload) => {
-            const list = document.getElementById('birthdays-ul');
-            const newItem = document.createElement('li');
-            newItem.innerHTML = `
-                <span class="name">${payload.new.name}</span>
-                <span class="date">${formatDate(payload.new.birthdate)}</span>
-            `;
-            list.appendChild(newItem);
-        })
+        }, () => displayBirthdays())
         .subscribe();
 }
-
-// ==================== INITIALIZATION ====================
-document.addEventListener('DOMContentLoaded', () => {
-    initTheme();
-    createStars();
-    window.addEventListener('resize', createStars);
-    setupRealtime();
-    
-    // Form submission
-    document.getElementById('birthday-form').addEventListener('submit', async (e) => {
-        e.preventDefault();
-        const name = document.getElementById('name').value.trim();
-        const birthdate = document.getElementById('birthdate').value;
-        
-        if (name && birthdate) {
-            const success = await addBirthday(name, birthdate);
-            if (success) {
-                showHoroscope(birthdate);
-                e.target.reset();
-            }
-        }
-    });
-    
-    // View birthdays button
-    document.getElementById('show-birthdays').addEventListener('click', displayBirthdays);
-    
-    // Floating labels
-    document.querySelectorAll('.form-group input').forEach(input => {
-        input.addEventListener('focus', () => 
-            input.parentElement.classList.add('focused'));
-        input.addEventListener('blur', () => 
-            !input.value && input.parentElement.classList.remove('focused'));
-    });
-});
